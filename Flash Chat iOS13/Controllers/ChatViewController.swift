@@ -17,11 +17,7 @@ class ChatViewController: UIViewController {
     
     let db = Firestore.firestore()
     
-    var messages: [Message] = [
-        Message(sender: "1@2.com", body: "Hey"),
-        Message(sender: "a@b.com", body: "Hello"),
-        Message(sender: "1@2.com", body: "What's up?")
-    ]
+    var messages: [Message] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +31,34 @@ class ChatViewController: UIViewController {
             UINib(nibName: Constants.cellNibName, bundle: nil),
             forCellReuseIdentifier: Constants.cellIdentifier
         )
+        
+        addMessagesListener()
+    }
+    
+    private func addMessagesListener() {
+        db.collection(Constants.FStore.collectionName).addSnapshotListener {snapshot, error in
+            if let e = error {
+                showToast(message: e.localizedDescription, in: self.view)
+            }else {
+                self.messages = []
+                
+                if let snapshotDocuments = snapshot?.documents {
+                    for doc in snapshotDocuments {
+                        let data = doc.data()
+                        let sender = data[Constants.FStore.senderField] as! String
+                        let messageBody = data[Constants.FStore.bodyField] as! String
+                        
+                        self.messages.append(
+                            Message(sender: sender, body: messageBody)
+                        )
+                        
+                        DispatchQueue.main.async {
+                            self.tableView.reloadData()
+                        }
+                    }
+                }
+            }
+        }
     }
     
     @IBAction func sendPressed(_ sender: UIButton) {
@@ -46,8 +70,6 @@ class ChatViewController: UIViewController {
             ], completion: {error in
                 if let e = error {
                     showToast(message: e.localizedDescription, in: self.view)
-                }else {
-                    
                 }
             })
         }
