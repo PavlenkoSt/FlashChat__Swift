@@ -27,6 +27,11 @@ class ChatViewController: UIViewController {
         
         navigationItem.hidesBackButton = true
         navigationItem.title = Constants.appName
+        
+        tableView.register(
+            UINib(nibName: Constants.cellNibName, bundle: nil),
+            forCellReuseIdentifier: Constants.cellIdentifier
+        )
     }
     
     @IBAction func sendPressed(_ sender: UIButton) {
@@ -48,9 +53,9 @@ extension ChatViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier, for: indexPath) as! MessageCell
         
-        cell.textLabel?.text = messages[indexPath.row].body
+        cell.label.text = messages[indexPath.row].body
         
         return cell
     }
