@@ -36,29 +36,31 @@ class ChatViewController: UIViewController {
     }
     
     private func addMessagesListener() {
-        db.collection(Constants.FStore.collectionName).addSnapshotListener {snapshot, error in
-            if let e = error {
-                showToast(message: e.localizedDescription, in: self.view)
-            }else {
-                self.messages = []
-                
-                if let snapshotDocuments = snapshot?.documents {
-                    for doc in snapshotDocuments {
-                        let data = doc.data()
-                        let sender = data[Constants.FStore.senderField] as! String
-                        let messageBody = data[Constants.FStore.bodyField] as! String
-                        
-                        self.messages.append(
-                            Message(sender: sender, body: messageBody)
-                        )
-                        
-                        DispatchQueue.main.async {
-                            self.tableView.reloadData()
+        db.collection(Constants.FStore.collectionName)
+            .order(by: Constants.FStore.dateField)
+            .addSnapshotListener {snapshot, error in
+                if let e = error {
+                    showToast(message: e.localizedDescription, in: self.view)
+                }else {
+                    self.messages = []
+                    
+                    if let snapshotDocuments = snapshot?.documents {
+                        for doc in snapshotDocuments {
+                            let data = doc.data()
+                            let sender = data[Constants.FStore.senderField] as! String
+                            let messageBody = data[Constants.FStore.bodyField] as! String
+                            
+                            self.messages.append(
+                                Message(sender: sender, body: messageBody)
+                            )
+                            
+                            DispatchQueue.main.async {
+                                self.tableView.reloadData()
+                            }
                         }
                     }
                 }
             }
-        }
     }
     
     @IBAction func sendPressed(_ sender: UIButton) {
@@ -66,10 +68,13 @@ class ChatViewController: UIViewController {
            let messageSender = Auth.auth().currentUser?.email {
             db.collection(Constants.FStore.collectionName).addDocument(data: [
                 Constants.FStore.senderField: messageSender,
-                Constants.FStore.bodyField: messageBody
+                Constants.FStore.bodyField: messageBody,
+                Constants.FStore.dateField: Date().timeIntervalSince1970
             ], completion: {error in
                 if let e = error {
                     showToast(message: e.localizedDescription, in: self.view)
+                }else{
+                    self.messageTextfield.text = ""
                 }
             })
         }
