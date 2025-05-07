@@ -16,4 +16,14 @@ class WelcomeViewController: UIViewController {
         super.viewDidLoad()
         titleLabel.text = Constants.appName
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.navigationController?.isNavigationBarHidden = true
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.navigationController?.isNavigationBarHidden = false
+    }
 }
