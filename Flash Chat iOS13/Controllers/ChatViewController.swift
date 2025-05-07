@@ -56,6 +56,10 @@ class ChatViewController: UIViewController {
                             
                             DispatchQueue.main.async {
                                 self.tableView.reloadData()
+                                if self.messages.count > 0 {
+                                    let indexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                                    self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                                }
                             }
                         }
                     }
@@ -74,7 +78,9 @@ class ChatViewController: UIViewController {
                 if let e = error {
                     showToast(message: e.localizedDescription, in: self.view)
                 }else{
-                    self.messageTextfield.text = ""
+                    DispatchQueue.main.async {
+                        self.messageTextfield.text = ""
+                    }
                 }
             })
         }
